@@ -9,6 +9,24 @@ You are helping create a well-structured Linear ticket. The user's rough idea: $
 
 Once a team is selected, **fetch that team's projects** from Linear using list_projects - don't hardcode project names.
 
+## Step 1b: Load Project Context (if specified)
+
+**Only do this step if the user explicitly mentions a project** (e.g., "ticket for the Auth project", "this is for Onboarding", "add to Dashboard redesign").
+
+1. **Fuzzy match the project name** - The user may not spell it exactly right or use the exact wording. Search the projects list for:
+   - Case-insensitive matches
+   - Partial matches (e.g., "auth" matches "Authentication Overhaul")
+   - Word matches (e.g., "dashboard" matches "Dashboard Redesign")
+
+2. If multiple projects could match, **use AskUserQuestion** to let them pick
+
+3. **Fetch the full project details** using get_project to get:
+   - Project description and objectives
+   - Current state and progress
+   - Any documented scope or goals
+
+4. **Use this context** when drafting the ticket to ensure it aligns with the project's goals and uses consistent terminology
+
 ## Step 2: Assess Scope
 
 Evaluate if this is ticket-sized or project-sized work:

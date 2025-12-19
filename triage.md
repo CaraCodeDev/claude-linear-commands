@@ -70,16 +70,34 @@ Use AskUserQuestion to gather what's missing (scope, expected behavior, etc.)
    - Add label: "Needs Info" (or similar)
    - Skip enhancement, move to next ticket
 
-### Step 6: Enhance (if needed)
+### Step 6: Fix the Title (Always Check)
+
+Client-submitted titles are often vague. **Always check and fix if needed:**
+
+Bad titles:
+- "Bug" → "Fix: Login fails when email contains + character"
+- "Feature request" → "Add: Export report as CSV"
+- "Issue with dashboard" → "Fix: Dashboard charts not loading on Safari"
+- "Can we change..." → "Update: Increase file upload limit to 50MB"
+
+Good titles:
+- Start with an action verb (Add, Fix, Remove, Update, Refactor, Implement)
+- Describe the specific outcome, not the category
+- Are scannable in a list without reading the description
+
+**Update the title in Linear immediately** if it needs improvement.
+
+### Step 7: Enhance Description (if needed)
 
 If the ticket needs fleshing out, follow the **create-ticket workflow**:
 - Explore codebase for technical context
 - Use AskUserQuestion with selectable options for key decisions
 - Draft enhanced description with: Context, Goal, Acceptance Criteria, Technical Notes
 
-### Step 7: Accept the Ticket
+### Step 8: Accept the Ticket
 
 Present the triage decisions:
+- **Title:** [updated title, if changed]
 - **Project:** [selected project]
 - **Labels:** [selected labels]
 - **Enhanced description:** [if updated]

@@ -1,5 +1,7 @@
 You are reviewing a Linear ticket or project for quality and completeness: $ARGUMENTS
 
+**IMPORTANT: This command is for ticket analysis and refinement only. The only thing you should update is the Linear ticket itself. DO NOT implement any code changes.**
+
 ## Step 0: Normalize Input
 
 If the input looks like a ticket ID (contains numbers), normalize it first:
@@ -13,8 +15,13 @@ If it looks like a project name (no numbers, or doesn't match ticket patterns), 
 ## Step 1: Identify What We're Reviewing
 
 Fetch the item from Linear:
-- If it's a ticket ID (like `TAC-123`), fetch the ticket
+- If it's a ticket ID (like `ABC-123`), fetch the ticket
 - If it's a project name or ID, fetch the project and its tickets
+
+**If reviewing a ticket that belongs to a project**, also fetch the full project details using get_project to understand:
+- Project objectives and goals
+- Overall scope and deliverables
+- Whether this ticket aligns with the project's direction
 
 ---
 
@@ -34,11 +41,28 @@ Check for these elements:
 | **Scope clarity** | ✅/❌ | Is it clear what's NOT included? |
 | **Right size** | ✅/❌ | Can this be done in a focused session, or should it be broken up? |
 
-### Step 2: Fill in the Gaps (Interactive)
+### Step 2: Fix the Title (Always)
+
+**Bad titles are tickets you'll skip later.** If the title is vague, generic, or doesn't describe the actual work, fix it immediately:
+
+Bad titles:
+- "Fix bug" → "Fix: Cart total doesn't update when removing items"
+- "Auth stuff" → "Add OAuth2 login with Google provider"
+- "Performance" → "Reduce dashboard load time by lazy-loading charts"
+- "Update UI" → "Replace date picker with native input on mobile"
+
+Good titles:
+- Start with an action verb (Add, Fix, Remove, Update, Refactor, Implement)
+- Describe the specific outcome, not the category
+- Are scannable in a list without reading the description
+
+**Always update the title in Linear if it needs improvement** - don't just propose it, change it.
+
+### Step 3: Fill in the Gaps (Interactive)
 
 If the ticket is missing context, **don't just report it - help fix it**:
 
-1. **Explore the codebase** to find relevant technical context:
+1. **Explore the codebase** to find relevant technical context (for documentation purposes only - do not make changes):
    - Search for related files, components, or code
    - Understand the current implementation
    - Identify dependencies or related systems
@@ -56,7 +80,7 @@ If the ticket is missing context, **don't just report it - help fix it**:
    - Acceptance criteria (testable "done" conditions)
    - Technical notes (files, dependencies, approach hints)
 
-### Step 3: Present the Enhanced Ticket
+### Step 4: Present the Enhanced Ticket
 
 **Ticket:** [ID - Title]
 **Project:** [Parent project if any]
@@ -89,9 +113,24 @@ If the ticket is missing context, **don't just report it - help fix it**:
 [Files involved, dependencies, implementation hints from codebase exploration]
 ```
 
-**Ask:** "Does this capture it? Any changes before I update the ticket?"
+**Use AskUserQuestion to get decisions and confirm understanding.**
 
-Only update the ticket in Linear after user confirmation.
+The AskUserQuestion tool supports 1-4 questions. Structure it like this:
+
+1. **First, ask any decision questions** you surfaced during exploration. Each should have concrete, selectable options. For example:
+   - "Which scope should this cover?" → Options: "Just X", "X and Y", "Full system"
+   - "What's the priority behavior?" → Options: "Option A", "Option B"
+   - "Should this include...?" → Options: "Yes, include it", "No, keep it simple"
+
+2. **Last question: confirm the proposed update** - Add this as your final question:
+   - Question: "Does this capture the ticket correctly?"
+   - Options: "Yes, update the ticket", "Needs changes"
+
+**Important**: Do NOT put decision questions in plain text and then ask a generic yes/no. The specific decisions MUST be selectable options in AskUserQuestion so the user can answer them directly.
+
+If you have no open questions, just ask the single confirmation question.
+
+Only update the ticket in Linear after user confirms via AskUserQuestion.
 
 ---
 
@@ -163,7 +202,7 @@ For each ticket, quickly assess:
 For each half-baked ticket, **follow the create-ticket workflow**:
 
 1. **Show the ticket** and what's missing
-2. **Explore the codebase** for relevant context
+2. **Explore the codebase** for relevant context (read-only - do not make changes)
 3. **Gather details using AskUserQuestion with selectable options** wherever possible:
    - Scope choices (which components/features affected)
    - UI/UX approach options
@@ -173,3 +212,42 @@ For each half-baked ticket, **follow the create-ticket workflow**:
 5. **Confirm and update** before moving to the next ticket
 
 Work through them one at a time. Don't batch-update without conversation.
+
+---
+
+## Step 5: Offer to Implement (Single Ticket Only)
+
+**Only do this step if you audited a single ticket (not a project).**
+
+After the ticket has been updated in Linear, use AskUserQuestion to ask:
+
+**Question:** "The ticket is ready. Want to implement it now?"
+**Options:**
+- "Yes, let's implement" - Proceed to implementation using the research you've already gathered
+- "No, just the audit" - End here
+
+### If "Yes, let's implement":
+
+1. **Mark the ticket "In Progress"** in Linear (if not already)
+
+2. **Skip redundant research** - You've already explored the codebase during the audit. Use that context directly.
+
+3. **Present your implementation approach** based on what you learned:
+   - Current state (from your audit exploration)
+   - The changes needed
+   - Relevant files you already identified
+   - Your suggested approach
+
+4. **Use AskUserQuestion to confirm** before starting:
+   - Include any implementation decisions as selectable options
+   - Final question: "Ready to proceed with this approach?"
+
+5. **Implement the changes** after confirmation
+
+6. **After implementation - IMPORTANT:**
+   - **Leave the ticket as "In Progress"** - Do NOT mark it Done or Completed
+   - **Do NOT create git commits** - Let the user review and test first
+   - Present a summary of what you changed
+   - Ask the user to review and test
+
+The user will decide when to commit and close the ticket after they've verified the changes work.
