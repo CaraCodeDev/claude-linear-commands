@@ -21,23 +21,11 @@ cp *.md your-repo/.claude/commands/
 
 ---
 
-## Workflow Lifecycle
+## Core Workflow
 
-### 1. Create Work
+The recommended workflow is three commands: **create the work → do the work → close the work**.
 
-**For a single task:** `/create-ticket <idea>`
-
-```
-/create-ticket add a button to export data as CSV
-```
-
-The command will:
-- Detect your team from the current repo
-- Assess if it's ticket-sized work (with context-aware breakdown options if too big)
-- Ask clarifying questions with selectable options
-- Draft a structured ticket (Context, Goal, Acceptance Criteria)
-- Suggest appropriate labels
-- Create the ticket after your approval
+### 1. Create the Work
 
 **For a larger initiative:** `/project-kickoff <idea>`
 
@@ -45,12 +33,23 @@ The command will:
 /project-kickoff user dashboard with activity metrics and notifications
 ```
 
-The command will:
-- Have a back-and-forth brainstorming conversation (not a checklist)
-- Explore your codebase to inform the discussion
-- Draft a comprehensive project overview (the source of truth for all tickets)
-- Create phase tickets with a naming convention (`1. Backend: Implement X`)
-- Include testing, QA, and optionally docs tickets
+- Has a back-and-forth brainstorming conversation (not a checklist)
+- Explores your codebase to inform the discussion
+- Drafts a comprehensive project overview (the source of truth for all tickets)
+- Creates phase tickets with a naming convention (`1. Backend: Implement X`)
+- Includes testing, QA, and optionally docs tickets
+
+**For a single task:** `/create-ticket <idea>`
+
+```
+/create-ticket add a button to export data as CSV
+```
+
+- Detects your team from the current repo
+- Assesses scope (with context-aware breakdown options if too big)
+- Asks clarifying questions with selectable options
+- Drafts a structured ticket (Context, Goal, Acceptance Criteria)
+- Creates the ticket after your approval
 
 ---
 
@@ -64,14 +63,13 @@ The command will:
 /start-ticket abc123     # handles missing hyphen
 ```
 
-The command will:
-- Fetch the ticket, comments, parent ticket context, and project overview
-- Mark it "In Progress"
-- Enter plan mode and explore your codebase
-- Write a detailed implementation plan
-- Resolve open questions with selectable options
-- Wait for your approval before implementing
-- After implementation, check if the project overview needs updating
+- Fetches the ticket, comments, parent ticket context, and project overview
+- Marks it "In Progress"
+- Enters plan mode and explores your codebase
+- Writes a detailed implementation plan
+- Resolves open questions with selectable options
+- Waits for your approval before implementing
+- After implementation, checks if the project overview needs updating
 
 ---
 
@@ -84,119 +82,34 @@ The command will:
 /close-ticket in review   # override default Done status
 ```
 
-The command will:
-- Identify the ticket from your branch or conversation
-- Review `git diff --stat` to see what changed
-- Generate a detailed Linear comment (summary, changes, decisions, testing)
-- Post comment → mark Done → commit → push (no confirmation needed)
-- Show remaining tickets in the project
+- Identifies the ticket from your branch or conversation
+- Reviews `git diff --stat` to see what changed
+- Generates a detailed Linear comment (summary, changes, decisions, testing)
+- Posts comment → marks Done → commits → pushes (no confirmation needed)
+- Shows remaining tickets in the project
 
 ---
 
-### 4. Commit (standalone)
+## Other Useful Commands
 
-**Quick commit:** `/commit`
-
-```
-/commit
-/commit ABC-123          # explicit ticket ID
-```
-
-The command will:
-- Auto-detect ticket context from branch, conversation, or recent commits
-- Fetch ticket details for the commit message
-- Stage, commit, and push (no confirmation needed)
-- Format: `ABC-123: feat(scope) - description`
-
----
-
-## Additional Commands
-
-### Audit: Review & Improve
-
-**Review a ticket or project:** `/audit <id or name>`
-
-```
-/audit ABC-123           # audit a single ticket
-/audit My Project        # audit a project and all its tickets
-```
-
-For tickets: checks title, context, acceptance criteria, scope, and size. If the ticket is too big, offers to break it into phases or a full project. After auditing, offers to implement immediately.
-
-For projects: audits all tickets for scope alignment, phase ordering, naming conventions, and project overview accuracy. Offers to fix issues interactively.
-
----
-
-### Triage: Process Incoming Tickets
-
-**Work through the triage queue:** `/triage`
-
-```
-/triage
-```
-
-The command will:
-- Let you select a team
-- Show all tickets in "Triage" status
-- For each ticket: assess completeness, suggest a project, identify Quick Wins
-- Fix vague titles, enhance descriptions
-- Route to Backlog or Todo based on your call
-
----
-
-### Create Documentation
-
-**Write user-facing docs:** `/create-doc <topic>`
-
-```
-/create-doc how to manage team permissions
-```
-
-The command will:
-- Research the codebase to understand the feature
-- Pick the right doc structure (how-to, feature overview, or getting started)
-- Propose a file path and wait for confirmation
-- Write the doc with screenshot placeholders
-
----
-
-### Simplify: Review Past Work
-
-**Revisit completed work:** `/simplify-ticket <id>`
-
-```
-/simplify-ticket ABC-123
-/simplify-ticket My Project    # review all files from a project
-```
-
-Finds all files changed for the ticket/project (via git log, comments, and branches) and presents them for review. Does not make changes — you decide what to do next.
+| Command | Purpose |
+|---------|---------|
+| `/create-doc <topic>` | Research the codebase and write user-facing documentation (how-to guides, feature overviews, getting started pages) with screenshot placeholders |
+| `/simplify-ticket <id>` | Find all files changed for a completed ticket or project (via git log, comments, branches) and present them for review and simplification |
+| `/commit` | Standalone commit — auto-detects ticket context from branch/conversation, stages, commits, and pushes with a formatted message |
+| `/audit <id>` | Review a ticket or project for quality — checks titles, scope, acceptance criteria, and offers to fix gaps interactively |
+| `/triage` | Process the triage queue — assess completeness, fix titles, route to projects, identify Quick Wins |
 
 ---
 
 ## Archive
 
-The `archive/` directory contains experimental commands that are no longer part of the main workflow:
+The `archive/` directory contains experimental commands no longer part of the main workflow:
 
-- **plan-phase** - Just-in-time planning for project phases (creates implementation tickets)
-- **run-phase** - Autonomous execution of a phase of tickets (autopilot mode)
+- **plan-phase** - Just-in-time planning for project phases
+- **run-phase** - Autonomous execution of a phase of tickets
 - **commit-phase** - Single commit for all work in a phase
-- **start-ticket-no-plan** - Start ticket without plan mode (uses AskUserQuestion instead)
-
----
-
-## Command Reference
-
-| Command | Purpose | When to use |
-|---------|---------|-------------|
-| `/create-ticket <idea>` | Create a new ticket | Starting focused work |
-| `/project-kickoff <idea>` | Create a project with tickets | Starting a larger initiative |
-| `/start-ticket <id>` | Begin work on a ticket | Ready to implement |
-| `/close-ticket` | Summarize, commit, close | Done with implementation |
-| `/commit` | Stage, commit, push | Need a quick commit with ticket context |
-| `/audit <id>` | Review and improve | Ticket/project needs refinement |
-| `/triage` | Process incoming queue | New tickets need routing |
-| `/create-doc <topic>` | Write documentation | Feature needs user-facing docs |
-| `/simplify-ticket <id>` | Review past changes | Want to revisit completed work |
+- **start-ticket-no-plan** - Start ticket without plan mode
 
 ---
 
