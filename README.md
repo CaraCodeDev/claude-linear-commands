@@ -33,7 +33,7 @@ cp *.md your-repo/.claude/commands/
 
 The command will:
 - Detect your team from the current repo
-- Assess if it's ticket-sized work
+- Assess if it's ticket-sized work (with context-aware breakdown options if too big)
 - Ask clarifying questions with selectable options
 - Draft a structured ticket (Context, Goal, Acceptance Criteria)
 - Suggest appropriate labels
@@ -46,10 +46,11 @@ The command will:
 ```
 
 The command will:
-- Walk through objectives, deliverables, and success signals
-- Draft a project with structured documentation
-- Suggest 3-6 initial tickets to get started
-- Create the project and optionally the starter tickets
+- Have a back-and-forth brainstorming conversation (not a checklist)
+- Explore your codebase to inform the discussion
+- Draft a comprehensive project overview (the source of truth for all tickets)
+- Create phase tickets with a naming convention (`1. Backend: Implement X`)
+- Include testing, QA, and optionally docs tickets
 
 ---
 
@@ -64,13 +65,13 @@ The command will:
 ```
 
 The command will:
-- Fetch the ticket and mark it "In Progress"
-- Explore your codebase to understand the current state
-- Present its understanding: relevant files, the problem, suggested approach
-- Ask clarifying questions if there are ambiguities
-- Wait for your confirmation before implementing
-
-After implementation, it leaves the ticket in progress and doesn't commit—you stay in control of the review.
+- Fetch the ticket, comments, parent ticket context, and project overview
+- Mark it "In Progress"
+- Enter plan mode and explore your codebase
+- Write a detailed implementation plan
+- Resolve open questions with selectable options
+- Wait for your approval before implementing
+- After implementation, check if the project overview needs updating
 
 ---
 
@@ -80,15 +81,32 @@ After implementation, it leaves the ticket in progress and doesn't commit—you 
 
 ```
 /close-ticket
+/close-ticket in review   # override default Done status
 ```
 
 The command will:
 - Identify the ticket from your branch or conversation
-- Review `git diff` to see what changed
-- Generate a Linear comment summarizing the work
-- Draft a commit message with the ticket ID
-- Ask if you want to mark it Done or send to Review
-- Post the comment, update status, and commit
+- Review `git diff --stat` to see what changed
+- Generate a detailed Linear comment (summary, changes, decisions, testing)
+- Post comment → mark Done → commit → push (no confirmation needed)
+- Show remaining tickets in the project
+
+---
+
+### 4. Commit (standalone)
+
+**Quick commit:** `/commit`
+
+```
+/commit
+/commit ABC-123          # explicit ticket ID
+```
+
+The command will:
+- Auto-detect ticket context from branch, conversation, or recent commits
+- Fetch ticket details for the commit message
+- Stage, commit, and push (no confirmation needed)
+- Format: `ABC-123: feat(scope) - description`
 
 ---
 
@@ -103,9 +121,9 @@ The command will:
 /audit My Project        # audit a project and all its tickets
 ```
 
-For tickets, it checks for clear title, context, acceptance criteria, and technical notes—then helps fill gaps by exploring your codebase and asking targeted questions.
+For tickets: checks title, context, acceptance criteria, scope, and size. If the ticket is too big, offers to break it into phases or a full project. After auditing, offers to implement immediately.
 
-For projects, it audits all tickets for scope alignment, identifies half-baked tickets, spots gaps, and offers to fix them interactively.
+For projects: audits all tickets for scope alignment, phase ordering, naming conventions, and project overview accuracy. Offers to fix issues interactively.
 
 ---
 
@@ -121,10 +139,48 @@ The command will:
 - Let you select a team
 - Show all tickets in "Triage" status
 - For each ticket: assess completeness, suggest a project, identify Quick Wins
-- Enhance vague tickets with structured details
+- Fix vague titles, enhance descriptions
 - Route to Backlog or Todo based on your call
 
-Useful for processing client-submitted tickets from Linear Asks.
+---
+
+### Create Documentation
+
+**Write user-facing docs:** `/create-doc <topic>`
+
+```
+/create-doc how to manage team permissions
+```
+
+The command will:
+- Research the codebase to understand the feature
+- Pick the right doc structure (how-to, feature overview, or getting started)
+- Propose a file path and wait for confirmation
+- Write the doc with screenshot placeholders
+
+---
+
+### Simplify: Review Past Work
+
+**Revisit completed work:** `/simplify-ticket <id>`
+
+```
+/simplify-ticket ABC-123
+/simplify-ticket My Project    # review all files from a project
+```
+
+Finds all files changed for the ticket/project (via git log, comments, and branches) and presents them for review. Does not make changes — you decide what to do next.
+
+---
+
+## Archive
+
+The `archive/` directory contains experimental commands that are no longer part of the main workflow:
+
+- **plan-phase** - Just-in-time planning for project phases (creates implementation tickets)
+- **run-phase** - Autonomous execution of a phase of tickets (autopilot mode)
+- **commit-phase** - Single commit for all work in a phase
+- **start-ticket-no-plan** - Start ticket without plan mode (uses AskUserQuestion instead)
 
 ---
 
@@ -136,15 +192,19 @@ Useful for processing client-submitted tickets from Linear Asks.
 | `/project-kickoff <idea>` | Create a project with tickets | Starting a larger initiative |
 | `/start-ticket <id>` | Begin work on a ticket | Ready to implement |
 | `/close-ticket` | Summarize, commit, close | Done with implementation |
+| `/commit` | Stage, commit, push | Need a quick commit with ticket context |
 | `/audit <id>` | Review and improve | Ticket/project needs refinement |
 | `/triage` | Process incoming queue | New tickets need routing |
+| `/create-doc <topic>` | Write documentation | Feature needs user-facing docs |
+| `/simplify-ticket <id>` | Review past changes | Want to revisit completed work |
 
 ---
 
 ## Tips
 
 - Commands auto-detect your team from the git remote
-- Ticket IDs are flexible: `TAC-123`, `tac-123`, `tac123`, or just `123`
-- Most questions use selectable options—faster than typing
+- Ticket IDs are flexible: `ABC-123`, `abc-123`, `abc123`, or just `123`
+- Most questions use selectable options — faster than typing
 - The commands explore your codebase to add relevant technical context
-- Nothing is created or updated without your confirmation
+- `/close-ticket` and `/commit` execute without confirmation by default
+- Project overviews are the source of truth — tickets reference them, not the other way around

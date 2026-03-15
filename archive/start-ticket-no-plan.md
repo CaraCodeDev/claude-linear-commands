@@ -21,15 +21,6 @@ Fetch the ticket from Linear using `get_issue` and `list_comments` **in parallel
 - **All comments** (use `list_comments` tool - these often contain important context, decisions, or clarifications)
 - Linked issues or parent tickets
 
-### Load Parent Ticket Context (if subissue)
-
-**If the ticket has a parent**, fetch the parent ticket details using `get_issue` to understand:
-- What larger task this subissue is part of
-- Any context, decisions, or constraints from the parent
-- How this subissue fits into the overall approach
-
-The parent ticket often contains the "why" and broader context that the subissue assumes.
-
 ### Load Project Context
 
 **If the ticket belongs to a project**, fetch the full project details using get_project to understand:
@@ -39,91 +30,78 @@ The parent ticket often contains the "why" and broader context that the subissue
 
 ## Step 2: Mark In Progress
 
-**Do NOT create or switch git branches.** Work on whatever branch the user is currently on. The user manages their own branches.
-
 Update the ticket status to "In Progress" in Linear.
 
-## Step 3: Enter Plan Mode
+## Step 3: Gather Codebase Context
 
-Use the `EnterPlanMode` tool to begin planning the implementation.
-
-Once in plan mode, you will:
-
-### 3a. Explore the Codebase
-
-Based on the ticket description, explore to understand:
+Based on the ticket description, explore the codebase to understand:
 
 1. **Where does this live?** Find the relevant files, components, or modules
 2. **How does it currently work?** Read the existing implementation
 3. **What's connected?** Identify related code, dependencies, or side effects
-4. **Any existing patterns?** Note conventions or approaches used elsewhere
+4. **Any existing patterns?** Note conventions or approaches used elsewhere that we should follow
 
-Use Glob, Grep, and Read tools to build a complete mental model.
+Use the codebase exploration to build a mental model - don't just skim, actually understand the current state.
 
-### 3b. Write the Plan
+## Step 4: Present Understanding
 
-Write a plan to the plan file that includes:
+Stop and present to the user:
 
-#### Ticket Summary
+### Ticket Summary
 > [One-line summary of what we're trying to accomplish]
 
-#### Current State
+### Current State
 [Explain how things work now - be specific about files and code paths]
 
-#### The Problem/Gap
+### The Problem/Gap
 [What's wrong, missing, or needs to change]
 
-#### Implementation Plan
-1. [First change - specific file and what to do]
-2. [Second change - specific file and what to do]
-3. [Continue as needed...]
+### Relevant Files
+- `path/to/file.ts` - [why it's relevant]
+- `path/to/other.ts` - [why it's relevant]
 
-#### Files to Modify
-- `path/to/file.ts` - [what changes]
-- `path/to/other.ts` - [what changes]
+### Initial Approach
+[Your suggested approach to solving this - 2-4 bullet points]
 
-#### Files to Create (if any)
-- `path/to/new.ts` - [purpose]
+### Questions/Concerns
+[Anything unclear, risky, or that needs discussion - list them here as context]
 
-#### Edge Cases & Considerations
-- [Anything to watch out for]
-- [Potential gotchas]
+---
 
-#### Open Questions (if any)
-- [Anything that needs user input before proceeding]
-
-### 3c. Resolve Open Questions
-
-**If you have questions or decisions that need user input**, use `AskUserQuestion` BEFORE exiting plan mode.
-
-Structure your questions with concrete, selectable options:
-- "Which approach should we take for X?" → Options: "Approach A - [tradeoff]", "Approach B - [tradeoff]"
-- "This could affect X or Y - which is the priority?" → Options: "Prioritize X", "Prioritize Y"
-- "Where should this component live?" → Options: "In /components", "In /features/X"
-
-**Important**: Don't put decisions in plain text. Each decision MUST be a selectable option so the user can answer directly.
-
-Once questions are resolved, update your plan to reflect the decisions before proceeding.
-
-If you have no open questions, skip to the title check.
-
-### 3e. Title Check
+### Title Check
 
 Now that you understand what this ticket is actually about, check if the title reflects that. If the title is vague ("Fix bug", "Auth stuff", "Update UI"), **update it in Linear** to be specific and actionable (e.g., "Fix: Cart total doesn't update when removing items").
 
-Good titles start with an action verb and describe the specific outcome.
+Good titles start with an action verb and describe the specific outcome. This should be rare if the ticket was already audited.
 
-### 3f. Exit Plan Mode
+---
 
-Use `ExitPlanMode` to present the plan for user approval.
+**Use AskUserQuestion to get decisions on your questions/concerns AND confirm understanding.**
 
-If the user requests changes or has questions, iterate on the plan until approved.
+The AskUserQuestion tool supports 1-4 questions. Structure it like this:
 
-## Step 4: Implement
+1. **First, ask any decision questions** you have (from Questions/Concerns above). Each should have concrete, selectable options. For example:
+   - "Which approach should we take for X?" → Options: "Approach A", "Approach B"
+   - "This could affect X or Y - which is the priority?" → Options: "Prioritize X", "Prioritize Y"
+   - "Where should this component live?" → Options: "In /components", "In /features/X"
 
-Once the user approves the plan via ExitPlanMode, implement the changes following your plan.
+2. **Last question: confirm understanding** - Add this as your final question:
+   - Question: "Does my understanding look correct?" (summarize the main points in the question)
+   - Options: "Yes, let's proceed", "Needs clarification"
 
-## Step 5: After Implementation
+**Important**: Do NOT put decision questions in plain text and then ask a generic yes/no. The specific decisions MUST be selectable options in AskUserQuestion so the user can answer them directly.
+
+If you have no questions/concerns, just ask the single confirmation question.
+
+## Step 5: Wait for Confirmation
+
+Do NOT start implementing until the user confirms the understanding is correct.
+
+If they select "Needs clarification" or provide corrections, update your mental model and re-confirm using AskUserQuestion again if needed.
+
+Only proceed to implementation after explicit go-ahead via the AskUserQuestion response.
+
+## Step 6: After Implementation
 
 When you've finished writing the code:
 
@@ -157,4 +135,4 @@ If yes, make a **surgical update** to the project description in Linear:
 - Preserve all other content exactly as-is
 - Add to existing sections rather than replacing them when possible
 
-This keeps the source of truth current for future ticket work.
+This keeps the source of truth current for future `/start-ticket` runs.

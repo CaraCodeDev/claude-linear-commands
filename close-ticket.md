@@ -1,5 +1,9 @@
 You are closing out work on the current Linear ticket.
 
+**This command writes a comment, moves to Done, commits, and pushes. No confirmation needed — just do it.**
+
+**Default behavior:** comment → mark Done → commit → push. If the user wants different behavior (e.g., mark as "In Review", skip push), they'll say so in $ARGUMENTS.
+
 ## Step 1: Identify the Ticket
 
 Determine which ticket we've been working on by:
@@ -13,17 +17,18 @@ Fetch the ticket from Linear to get the full context.
 
 Look at the actual changes made during this session:
 - Run `git status` to see modified/added files
-- Run `git diff` to understand the changes
+- Run `git diff --stat` to understand the scope of changes
 - Review the conversation to capture what was accomplished
 
 Build a clear picture of what was implemented, fixed, or changed.
 
-## Step 3: Generate Summary
+## Step 3: Generate Comment
 
-Create a concise summary of the work:
+Create a detailed comment for the Linear ticket:
 
-**For the Linear comment:**
 ```markdown
+[One plain-language sentence explaining what this ticket accomplishes for a non-technical reader]
+
 ## Completed
 
 [2-4 bullet points of what was done]
@@ -33,58 +38,41 @@ Create a concise summary of the work:
 - `path/to/file.ts` - [what changed]
 - `path/to/other.ts` - [what changed]
 
+## Decisions Made
+
+[If any decisions were made during implementation, document them]
+- **[Decision]**: [rationale - what pattern it matches or why it's simpler]
+
 ## Testing
 
-[How this was tested or verified, if applicable]
+[How this was tested or verified]
 ```
 
-**For the commit message:**
-```
-<ticket-id>: <type>(scope) - <short description>
+## Step 4: Execute (No Confirmation Needed)
 
-<ticket-id>: <what was accomplished>
+Do all of this without asking:
 
-- Key change 1
-- Key change 2
+1. **Post the comment** to Linear
+2. **Update ticket status** to "Done" (unless user specified a different status in arguments)
+3. **Commit changes** — stage all, generate commit message, commit
+4. **Push** to remote
+5. **Report back** with a brief summary: ticket link, commit hash, push status
 
-- Link to the ticket
+## Step 5: What's Next?
 
-🤖 Generated with Claude Code
-```
+After closing the ticket:
 
-Where type is: `Fix`, `Feature`, `Refactor`, `Docs`, `Chore`, `UX/UI`, `Bug`, etc.
+1. **Find the project** this ticket belongs to (you already fetched the ticket in Step 1)
+2. **List remaining tickets** in the project that are not Done/Cancelled — show them in a table (ticket ID, title, status)
+3. **If there are no more tickets**: Tell the user there are no remaining tickets in the project — it's all done!
 
-## Step 4: Confirm with User
+## Branch Management
 
-Present:
-- **Ticket:** [ID and title]
-- **Linear Comment:** [the formatted comment]
-- **Commit Message:** [the formatted commit]
-- **Files to commit:** [list from git status]
-
-**Ask about review status using AskUserQuestion tool:**
-1. **Changes?**
-2. **Close it** - Mark as Done (no review needed)
-2. **Send to review** - Move to In Review status
-3. **Send to review with comments** - Move to In Review and ask what comment to leave for reviewers
-
-## Step 5: Execute (after confirmation)
-
-1. **Post comment** to Linear with the summary
-2. **Update ticket status** based on user's choice:
-   - If closing: Set to "Done"
-   - If review: Set to "In Review"
-   - If review with comments: Set to "In Review", then post a second comment with the user's note for reviewers
-3. **Stage all changes:** `git add .`
-4. **Commit** with the formatted message including ticket ID
-5. **Report back** with:
-   - Link to the ticket
-   - Commit hash
-   - Current ticket status
-   - Ask if user wants to push to remote
+**Do NOT create or switch git branches.** Commit and push on whatever branch the user is currently on. The user manages their own branches.
 
 ## Edge Cases
 
-- **No changes to commit?** Skip git steps, just comment and close the ticket
-- **Uncommitted changes from other work?** Include it too
-- **Branch doesn't match ticket?** Confirm with user before proceeding
+- **No changes?** Still close the ticket if the work is done (e.g., investigation tickets), skip commit offer
+- **Ticket already Done?** Just add the comment, don't change status
+- **Nothing to commit?** Skip the commit offer
+- **Ticket has no project?** Skip the "what's next" step

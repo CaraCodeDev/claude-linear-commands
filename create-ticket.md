@@ -29,24 +29,33 @@ Once a team is selected, **fetch that team's projects** from Linear using list_p
 
 ## Step 2: Assess Scope
 
-Evaluate if this is ticket-sized or project-sized work:
+Evaluate if this is ticket-sized or needs to be broken up:
 
-**Ticket-sized signals:**
+**Single ticket signals:**
 - Single feature, fix, or enhancement
 - Action words like "Fix", "Add", "Update", "Change", "Remove"
 - Specific UI element, endpoint, or behavior
 - Can be completed in a focused session
 
-**Project-sized signals:**
-- Multiple systems or components involved
+**Needs breakdown signals:**
+- Touches 3+ distinct areas (database + backend + frontend, etc.)
+- Would take multiple focused sessions
+- Has natural phases that could be done independently
 - Broad goals like "I want to...", "We need to build..."
-- New capability area or major feature set
-- Would require multiple tickets to implement
-- Has distinct phases or milestones
 
-If it's ambiguous whether this is ticket or project-sized, use AskUserQuestion:
-- Question: "How should we scope this?"
-- Options: "Single ticket" (focused task) vs "Project with sub-tickets" (larger initiative)
+**If it needs breakdown, use AskUserQuestion with context-aware options:**
+
+If user specified a project (from Step 1b):
+- "Single ticket" → Proceed with one ticket in that project
+- "Multiple phase tickets" → Create 2-4 tickets in the same project
+- "Too big - needs its own project" → Redirect to `/project-kickoff`
+
+If no project specified:
+- "Single ticket" → Create one standalone ticket
+- "A few tickets" → Create 2-4 related tickets without a project wrapper
+- "Full project" → Redirect to `/project-kickoff`
+
+If they choose multiple tickets, gather enough context to create all of them with proper ordering (1. Database, 2. Backend, etc.).
 
 ## Step 3: Gather Details (for tickets)
 

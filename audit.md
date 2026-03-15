@@ -15,7 +15,7 @@ If it looks like a project name (no numbers, or doesn't match ticket patterns), 
 ## Step 1: Identify What We're Reviewing
 
 Fetch the item from Linear:
-- If it's a ticket ID (like `ABC-123`), fetch the ticket
+- If it's a ticket ID (like `ABC-123`), use `get_issue` to fetch the ticket, then use `list_comments` to fetch all comments (comments often contain important context, decisions, or clarifications)
 - If it's a project name or ID, fetch the project and its tickets
 
 **If reviewing a ticket that belongs to a project**, also fetch the full project details using get_project to understand:
@@ -39,7 +39,7 @@ Check for these elements:
 | **Acceptance Criteria** | ✅/❌ | How do we know when it's done? |
 | **Technical pointers** | ✅/⚠️/❌ | Any hints on where to look or how to approach? |
 | **Scope clarity** | ✅/❌ | Is it clear what's NOT included? |
-| **Right size** | ✅/❌ | Can this be done in a focused session, or should it be broken up? |
+| **Right size** | ✅/❌ | Can this be done in a focused session? (see scope check below) |
 
 ### Step 2: Fix the Title (Always)
 
@@ -58,7 +58,36 @@ Good titles:
 
 **Always update the title in Linear if it needs improvement** - don't just propose it, change it.
 
-### Step 3: Fill in the Gaps (Interactive)
+### Step 3: Check if This Should Be a Project
+
+**Signs this ticket is actually project-sized:**
+- Touches 3+ distinct areas (database + backend + frontend, etc.)
+- Would take multiple focused sessions
+- Has natural phases that could be done independently
+- Description keeps growing as you explore
+
+**If it's too big:**
+
+Stop and present options using AskUserQuestion:
+
+> This ticket involves [X, Y, Z] which would be easier to tackle as separate pieces.
+
+**Options (vary based on context):**
+
+If ticket is already in a project:
+- "Break into phases" → Create 2-4 phase tickets in the same project, close this one
+- "Narrow scope" → Cut this to just [smallest piece], create follow-ups for the rest
+- "Keep as-is" → Proceed knowing it's a chunky ticket
+
+If ticket is standalone (no project):
+- "Create a project" → Run `/project-kickoff` for a full initiative
+- "Just split it" → Create 2-4 tickets without a project wrapper
+- "Narrow scope" → Cut this to just [smallest piece], create follow-ups
+- "Keep as-is" → Proceed anyway
+
+If they choose to split, convert this ticket into the first phase and create the others alongside it.
+
+### Step 4: Fill in the Gaps (Interactive)
 
 If the ticket is missing context, **don't just report it - help fix it**:
 
@@ -80,7 +109,7 @@ If the ticket is missing context, **don't just report it - help fix it**:
    - Acceptance criteria (testable "done" conditions)
    - Technical notes (files, dependencies, approach hints)
 
-### Step 4: Present the Enhanced Ticket
+### Step 5: Present the Enhanced Ticket
 
 **Ticket:** [ID - Title]
 **Project:** [Parent project if any]
@@ -152,12 +181,15 @@ Only update the ticket in Linear after user confirms via AskUserQuestion.
 
 **Ticket Audit:**
 
-For each ticket, quickly assess:
-
 | Ticket | Status | In Scope? | Well-Defined? | Issues |
 |--------|--------|-----------|---------------|--------|
-| ABC-1 | Todo | ✅/❌ | ✅/🟡/❌ | [notes] |
-| ABC-2 | In Progress | ✅/❌ | ✅/🟡/❌ | [notes] |
+| 1. Database | Done | ✅ | ✅ | - |
+| 2. Backend | In Progress | ✅ | ✅ | - |
+| 3. Frontend | Todo | ✅ | 🟡 | Missing acceptance criteria |
+
+**Phase Order Check:**
+- Are phases ordered logically (dependencies first)?
+- Is the naming convention being followed (`[Order]. [Phase]: [Action]`)?
 
 **Scope Creep Check:**
 - Do all tickets align with the project's stated objectives?
@@ -165,8 +197,8 @@ For each ticket, quickly assess:
 - Are there tickets that are actually separate initiatives?
 
 **Completeness Check:**
-- Are there obvious gaps in the tickets needed to achieve the objectives?
-- Are dependencies between tickets clear?
+- Are all expected phases represented with tickets?
+- Are dependencies between phases clear?
 
 ### Present Findings
 
@@ -190,10 +222,28 @@ For each ticket, quickly assess:
 2. [Priority action 2]
 3. [Priority action 3]
 
+**Project Overview Check:**
+- Is the project overview still accurate?
+- Has scope drifted from what's documented?
+- Are there learnings from completed tickets that should be captured?
+
+If the overview needs updating, note the **specific sections and changes** needed.
+
 **Use AskUserQuestion (multiSelect: true):** "What should I help with?"
+- Update the project overview with [specific changes]
 - Move out-of-scope tickets to the right place
 - Flesh out half-baked tickets (I'll go through each interactively)
 - Create the missing tickets
+
+### If Updating Project Overview
+
+Make **surgical updates** only:
+- Read the current project overview first
+- Only modify the specific section that needs updating
+- Preserve all other content exactly as-is
+- Add to existing sections rather than replacing them when possible
+
+Never overwrite the entire overview - just fix what's stale or missing.
 
 ---
 
@@ -215,7 +265,7 @@ Work through them one at a time. Don't batch-update without conversation.
 
 ---
 
-## Step 5: Offer to Implement (Single Ticket Only)
+## Step 6: Offer to Implement (Single Ticket Only)
 
 **Only do this step if you audited a single ticket (not a project).**
 
